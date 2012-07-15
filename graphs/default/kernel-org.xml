@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="no"?>
+
+<graph>
+
+	<description>
+
+	The kernel-org Roll
+
+	</description>
+
+	<copyright>
+	Copyright (c) 2000 - 2012 The Regents of the University of California.
+	All rights reserved. Rocks(r) v5.5/v6.0 www.rocksclusters.org
+	
+	</copyright>
+
+	<changelog>
+	$Log: kernel-org.xml,v $
+	Revision 1.1  2012/07/15 18:55:55  phil
+	Make a roll that supports kernel.org kernels
+	
+	</changelog>
+
+	<!-- add edges here -->
+	<edge from="base" to="kernel-org-base"/>
+	<edge from="base" to="kernel-org-grub"/>
+	<edge from="server" to="kernel-org"/>
+
+	<!-- Ordering, fix grub after all other grub code has run -->
+
+	<!-- fix the anaconda-created grub.conf b4 standard rocks handling-->
+	<order tail="grub" head="kernel-org-grub"/>
+</graph>

@@ -1,0 +1,123 @@
+<chapter id="using" xreflabel="Using the kernel-org Roll">
+
+
+<title> Creating a Custom Kernel RPM using kernel.org's Source </title>
+
+<section id="using-kernel-org" xreflabel="Using the kernel-org roll">
+<title>Using the kernel-org Roll</title>
+
+<para>
+Since this roll is intended for customization, it is recommended that you
+download source for the roll from <ulink url="http://git.rocksclusters.org">git.rocksclusters.org</ulink>. The following assumes you have grabbed the source
+code and have unpacked it locally.
+</para>
+
+<itemizedlist>
+
+<listitem>
+	<para>
+	Change into the directory:
+	</para>
+
+<screen>
+# cd kernel-org/src/kernel-org
+</screen>
+</listitem>
+
+<listitem>
+	<para>
+	you may Download the kernel source tarball from kernel.org.
+	or utilize the version supplied in the roll
+	For example:
+	</para>
+
+<screen>
+# wget http://www.kernel.org/pub/linux/kernel/v3.0/linux-3.4.4.tar.bz2
+</screen>
+
+</listitem>
+
+<listitem>
+<warning>
+<para>
+If you download a different version than supplied in the roll, you must edit
+<computeroutput>version.mk</computeroutput> to reflect the version change
+</para>
+</warning>
+</listitem>
+<listitem>
+	<para>
+	Create a custom kernel "config" file and put it in
+	<computeroutput>config-&lt;VERSION&gt;</computeroutput>
+	</para>
+	<para>
+	You can create the config file by using the following procedure:
+	</para>
+
+<screen>
+# make menuconfig
+</screen>
+
+	<para>
+	Configure the kernel anyway you need, and after the configuration is
+	over choose to save the configuration in the default location. 
+	The kernel-org Makefile supplied by Rocks will copy it to the proper
+        location. 
+	</para>
+
+	<note>
+	<para>
+	The <emphasis>&lt;VERSION&gt;</emphasis> number must match the
+	version number of the kernel source and version.mk.
+	For example, if you downloaded
+	<computeroutput>linux-3.4.4.tar.bz2</computeroutput>, the name of
+	the config file will be 
+	<computeroutput>config-3.4.4</computeroutput>.
+	</para>
+	</note>
+</listitem>
+
+<listitem>
+	<para>
+	Build the roll 
+	</para>
+
+<screen>
+# cd &lt;root of kernel-org roll&gt;
+# make roll
+</screen>
+</listitem>
+
+<listitem>
+	<para>
+	add the roll, enable it and rebuild the rocks distribution	
+	</para>
+
+<screen>
+# rocks add roll kernel-org*iso
+# rocks enable roll kernel-org
+# (cd /export/rocks/install; rocks create distro)
+</screen>
+</listitem>
+
+<listitem>
+	<para>
+	Test the new kernel by reinstalling a compute node:
+	</para>
+
+<screen>
+#  ssh compute-0-0 /boot/kickstart/cluster-kickstart-pxe
+</screen>
+</listitem>
+
+<listitem>
+	<para>
+	If the kernel works to your satisfaction, reinstall all the compute
+	nodes that you want to run the new kernel.
+	</para>
+</listitem>
+</itemizedlist>
+
+</section>
+
+</chapter>

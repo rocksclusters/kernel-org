@@ -1,0 +1,20 @@
+<preface id="preface" xreflabel="preface">
+<title>Preface</title>
+
+
+<para>
+The kernel-org Roll enables users to incorporate custom-compiled kernel.org
+kernels into their Rocks (TM) cluster.  This roll is intended for 
+<emphasis>advanced users and administrators</emphasis> who require kernel configurations not supplied by the upstream vendor  
+</para>
+
+
+<warning>
+<para>
+Using kernels from <ulink
+url="http://www.kernel.org">kernel.org
+</ulink> may adversely affect stability of your cluster. This roll creates 
+<computeroutput>kernel</computeroutput> and <computeroutput>kernel-headers</computeroutput> packages only. 
+</para>
+</warning>
+</preface>
