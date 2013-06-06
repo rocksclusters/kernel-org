@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2012/11/27 00:49:07 phil Exp $
+# $Id$
 #
 # @Copyright@
 # 
@@ -54,7 +54,7 @@
 # 
 # @Copyright@
 #
-# $Log: Makefile,v $
+# $Log$
 # Revision 1.2  2012/11/27 00:49:07  phil
 # Copyright Storm for Emerald Boa
 #
@@ -66,6 +66,20 @@ include version.mk
 TAR = /bin/tar
 ARCH = $(shell /bin/uname -p)
 REDHAT.ROOT = $(CURDIR)/../../
+PATCHES = mkspec.patch
+
+## Following Definitions to Patch for WEB10G Stats
+## This only works for a few versions of kernels
+ifdef WEB10G
+PATCHES += $(ESTATSPATCH)
+DISTCONFIG = config-$(VERSION)-WEB10G
+endif
+
+
+## Grabs the RHEL spec definition parts that will create a compatible
+## kernel, kernel-devel, kernel-headers package triple
+SCRIPTS = rhel-spec-components
+SCRIPTSDEST = scripts/package
 
 
 rpm pkg: RPMDIRS config
@@ -79,6 +93,12 @@ unpack: $(NAME)-$(VERSION)
 
 $(NAME)-$(VERSION):
 	bunzip2 -c $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
+	(cd $(NAME)-$(VERSION); \
+	 for p in $(PATCHES); do \
+		patch -p1 <  ../$$p; \
+	done )
+	for s in $(SCRIPTS); do cp $$s $(NAME)-$(VERSION)/$(SCRIPTSDEST); done
+	
 
 config: unpack
 	if [ ! -f  $(USERCONFIG) ]; then /bin/cp $(DISTCONFIG) $(USERCONFIG); fi

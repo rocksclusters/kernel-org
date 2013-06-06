@@ -1,0 +1,166 @@
+# Define these vars for the generic kernel-org
+KernelVer=%{version}
+DevelDir=/usr/src/kernels/%{version}-%{_arch}
+
+## remove build/source directories
+if [ -e $RPM_BUILD_ROOT/lib/modules/$KernelVer/build ]; then
+	rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+fi
+if [ -e $RPM_BUILD_ROOT/lib/modules/$KernelVer/source ]; then 
+	rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/source
+fi
+
+# make the devel-dir under /usr/src/kernels
+mkdir -p $RPM_BUILD_ROOT/$DevelDir
+tar cf - --exclude vmlinux --exclude '*\.o' * --exclude '*\.ko'  | (cd $RPM_BUILD_ROOT/$DevelDir; tar xfBp -)
+ln -sf ../../..$DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+ln -sf ../../..$DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/source
+
+
+#### ROCKS
+## Taken from Kernel Spec File
+## We set the following variables so that the copied code
+## Needs only modest editing
+%define with_dracut 0
+%define KVERREL %{version}
+%define ROCKS 1
+#### ROCKS
+
+###
+### scripts
+###
+
+#
+# This macro defines a %%post script for a kernel*-devel package.
+#	%%kernel_devel_post [<subpackage>]
+#
+%define kernel_devel_post() \
+%{expand:%%post %{?1:%{1}-}devel}\
+if [ -f /etc/sysconfig/kernel ]\
+then\
+    . /etc/sysconfig/kernel || exit $?\
+fi\
+if [ "$HARDLINK" != "no" -a -x /usr/sbin/hardlink ]\
+then\
+    (cd /usr/src/kernels/%{KVERREL}%{?1:.%{1}} &&\
+     /usr/bin/find . -type f | while read f; do\
+       hardlink -c /usr/src/kernels/*.fc*.*/$f $f\
+     done)\
+fi\
+%{nil}
+
+# This macro defines a %%posttrans script for a kernel package.
+#	%%kernel_variant_posttrans [<subpackage>]
+# More text can follow to go at the end of this variant's %%post.
+#
+# grubby might be called during installation when a boot loader configuration
+# file is not present, so just drop any error messages. See BZ#610813 for
+# more details.
+%define kernel_variant_posttrans() \
+%{expand:%%posttrans %{?1}}\
+%{expand:\
+NEWKERNARGS=""\
+(/sbin/grubby --info=`/sbin/grubby --default-kernel`) 2>/dev/null | grep -q crashkernel\
+if [ $? -ne 0 ]\
+then\
+	NEWKERNARGS="--kernel-args=\"crashkernel=auto\""\
+fi\
+%if %{with_dracut}\
+/sbin/new-kernel-pkg --package kernel%{?1:-%{1}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?1:.%{1}} $NEWKERNARGS || exit $?\
+%else\
+/sbin/new-kernel-pkg --package kernel%{?1:-%{1}} --mkinitrd --depmod --update %{KVERREL}%{?1:.%{1}} $NEWKERNARGS || exit $?\
+%endif}\
+/sbin/new-kernel-pkg --package kernel%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
+if [ -x /sbin/weak-modules ]\
+then\
+    /sbin/weak-modules --add-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
+fi\
+%{nil}
+
+#
+# This macro defines a %%post script for a kernel package and its devel package.
+#	%%kernel_variant_post [-v <subpackage>] [-r <replace>]
+# More text can follow to go at the end of this variant's %%post.
+#
+%define kernel_variant_post(v:r:) \
+%{expand:%%kernel_devel_post %{?-v*}}\
+%{expand:%%kernel_variant_posttrans %{?-v*}}\
+%{expand:%%post %{?-v*}}\
+%{-r:\
+if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
+   [ -f /etc/sysconfig/kernel ]; then\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+fi}\
+if grep --silent '^hwcap 0 nosegneg$' /etc/ld.so.conf.d/kernel-*.conf 2> /dev/null; then\
+  sed -i '/^hwcap 0 nosegneg$/ s/0/1/' /etc/ld.so.conf.d/kernel-*.conf\
+fi\
+%{expand:\
+/sbin/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+}\
+%{nil}
+
+#
+# This macro defines a %%preun script for a kernel package.
+#	%%kernel_variant_preun <subpackage>
+#
+%define kernel_variant_preun() \
+%{expand:%%preun %{?1}}\
+/sbin/new-kernel-pkg --rminitrd --rmmoddep --remove %{KVERREL}%{?1:.%{1}} || exit $?\
+if [ -x /sbin/weak-modules ]\
+then\
+    /sbin/weak-modules --remove-kernel %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+fi\
+%{nil}
+
+%kernel_variant_preun
+#### ROCKS
+##
+%if %{ROCKS}
+%kernel_variant_post
+%else
+#### ROCKS
+%ifarch x86_64
+%kernel_variant_post -r (kernel-smp|kernel-xen)
+%else
+%kernel_variant_post -r kernel-smp
+%endif
+
+%kernel_variant_preun smp
+%kernel_variant_post -v smp
+
+%kernel_variant_preun PAE
+%kernel_variant_post -v PAE -r (kernel|kernel-smp|kernel-xen)
+
+%kernel_variant_preun debug
+%kernel_variant_post -v debug
+
+%kernel_variant_post -v PAEdebug -r (kernel|kernel-smp|kernel-xen)
+%kernel_variant_preun PAEdebug
+
+%ifarch s390x
+%postun kdump
+    # Create softlink to latest remaining kdump kernel.
+    # If no more kdump kernel is available, remove softlink.
+    if [ "$(readlink /boot/zfcpdump)" == "/boot/vmlinuz-%{KVERREL}.kdump" ]
+    then
+        vmlinuz_next=$(ls /boot/vmlinuz-*.kdump 2> /dev/null | sort | tail -n1)
+        if [ $vmlinuz_next ]
+        then
+            ln -sf $vmlinuz_next /boot/zfcpdump
+        else
+            rm -f /boot/zfcpdump
+        fi
+    fi
+
+%post kdump
+    ln -sf /boot/vmlinuz-%{KVERREL}.kdump /boot/zfcpdump
+%endif
+#### ROCKS
+%endif
+#### ROCKS
+
+if [ -x /sbin/ldconfig ]
+then
+    /sbin/ldconfig -X || exit $?
+fi
+

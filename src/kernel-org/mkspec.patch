@@ -1,0 +1,56 @@
+diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mkspec
+*** linux-3.4.4-orig/scripts/package/mkspec	2012-06-22 11:37:50.000000000 -0700
+--- linux-3.4.4/scripts/package/mkspec	2013-05-24 15:58:39.079901000 -0700
+***************
+*** 59,65 ****
+  echo "building most standard programs and are also needed for rebuilding the"
+  echo "glibc package."
+  echo ""
+! 
+  if ! $PREBUILT; then
+  echo "%prep"
+  echo "%setup -q"
+--- 59,73 ----
+  echo "building most standard programs and are also needed for rebuilding the"
+  echo "glibc package."
+  echo ""
+! echo "%package devel"
+! echo "Summary: Kernel Source, against which modules can be built"
+! echo "Group: Development/System"
+! echo "Obsoletes: kernel-devel"
+! echo "Provides: kernel-devel = %{version}"
+! echo "%description devel"
+! echo "Kernel-devel provides the kernel source code. This enables"
+! echo "kernel modules to be built after kernel install"
+! echo ""
+  if ! $PREBUILT; then
+  echo "%prep"
+  echo "%setup -q"
+***************
+*** 106,112 ****
+  echo 'mv vmlinux.bz2 $RPM_BUILD_ROOT'"/boot/vmlinux-$KERNELRELEASE.bz2"
+  echo 'mv vmlinux.orig vmlinux'
+  echo "%endif"
+! 
+  echo ""
+  echo "%clean"
+  echo 'rm -rf $RPM_BUILD_ROOT'
+--- 114,120 ----
+  echo 'mv vmlinux.bz2 $RPM_BUILD_ROOT'"/boot/vmlinux-$KERNELRELEASE.bz2"
+  echo 'mv vmlinux.orig vmlinux'
+  echo "%endif"
+! cat `dirname $0`/rhel-spec-components
+  echo ""
+  echo "%clean"
+  echo 'rm -rf $RPM_BUILD_ROOT'
+***************
+*** 122,124 ****
+--- 130,137 ----
+  echo '%defattr (-, root, root)'
+  echo "/usr/include"
+  echo ""
++ echo "%files devel"
++ echo '%defattr (-, root, root)'
++ echo "%dir /usr/src/kernels"
++ echo "/usr/src/kernels/%{version}-%{_arch}"
++ echo ""
