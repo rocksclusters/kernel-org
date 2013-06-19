@@ -20,7 +20,8 @@
 	
 	</changelog>
 
-<post>
+<!-- only do this post of kernel_org_grub condition is set -->
+<post cond="kernel_org_grub">
 <!--Create an initrd in grub.conf if necessary --> 
 /opt/rocks/sbin/check-initrd
 
