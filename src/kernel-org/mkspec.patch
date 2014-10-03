@@ -1,6 +1,5 @@
-diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mkspec
-*** linux-3.4.4-orig/scripts/package/mkspec	2012-06-22 11:37:50.000000000 -0700
---- linux-3.4.4/scripts/package/mkspec	2013-05-24 15:58:39.079901000 -0700
+*** linux-3.10.55-orig/scripts/package/mkspec	2014-09-17 09:04:18.000000000 -0700
+--- linux-3.10.55/scripts/package/mkspec	2014-10-02 20:06:03.381619658 -0700
 ***************
 *** 59,65 ****
   echo "building most standard programs and are also needed for rebuilding the"
@@ -10,7 +9,7 @@ diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mks
   if ! $PREBUILT; then
   echo "%prep"
   echo "%setup -q"
---- 59,73 ----
+--- 59,83 ----
   echo "building most standard programs and are also needed for rebuilding the"
   echo "glibc package."
   echo ""
@@ -22,6 +21,16 @@ diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mks
 ! echo "%description devel"
 ! echo "Kernel-devel provides the kernel source code. This enables"
 ! echo "kernel modules to be built after kernel install"
+! echo ""
+! echo ""
+! echo "%package firmware"
+! echo "Summary: Firmware files used by the Linux kernel"
+! echo "Group: Development/System"
+! echo "Obsoletes: kernel-firmware"
+! echo "Provides: kernel-firmware = %{version}"
+! echo "%description firmware"
+! echo "Kernel-firmware includes firmware files required for some "
+! echo "devices to operate."
 ! echo ""
   if ! $PREBUILT; then
   echo "%prep"
@@ -35,7 +44,7 @@ diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mks
   echo ""
   echo "%clean"
   echo 'rm -rf $RPM_BUILD_ROOT'
---- 114,120 ----
+--- 124,130 ----
   echo 'mv vmlinux.bz2 $RPM_BUILD_ROOT'"/boot/vmlinux-$KERNELRELEASE.bz2"
   echo 'mv vmlinux.orig vmlinux'
   echo "%endif"
@@ -44,8 +53,24 @@ diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mks
   echo "%clean"
   echo 'rm -rf $RPM_BUILD_ROOT'
 ***************
-*** 122,124 ****
---- 130,137 ----
+*** 115,124 ****
+  echo '%defattr (-, root, root)'
+  echo "%dir /lib/modules"
+  echo "/lib/modules/$KERNELRELEASE"
+- echo "/lib/firmware"
+  echo "/boot/*"
+  echo ""
+  echo "%files headers"
+  echo '%defattr (-, root, root)'
+  echo "/usr/include"
+  echo ""
+--- 133,149 ----
+  echo '%defattr (-, root, root)'
+  echo "%dir /lib/modules"
+  echo "/lib/modules/$KERNELRELEASE"
+  echo "/boot/*"
+  echo ""
+  echo "%files headers"
   echo '%defattr (-, root, root)'
   echo "/usr/include"
   echo ""
@@ -54,3 +79,6 @@ diff -rc linux-3.4.4-orig/scripts/package/mkspec linux-3.4.4/scripts/package/mks
 + echo "%dir /usr/src/kernels"
 + echo "/usr/src/kernels/%{version}-%{_arch}"
 + echo ""
++ echo "%files firmware"
++ echo '%defattr (-, root, root)'
++ echo "/lib/firmware"

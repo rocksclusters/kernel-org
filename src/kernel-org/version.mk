@@ -1,8 +1,8 @@
 PKGROOT		= /opt/kernel-org
 NAME        = linux
-VERSION     = 3.4.4
+VERSION     = 3.10.55
 RELEASE 	= 1
-TARBALL_POSTFIX	=  tar.bz2
+TARBALL_POSTFIX	=  tar.xz
 
 # Uncomment the following WEB10G line to indicate
 # estats Patch should be applied. Patch is kernel specific
