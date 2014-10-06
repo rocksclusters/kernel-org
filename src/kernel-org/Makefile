@@ -92,7 +92,7 @@ rpm pkg: RPMDIRS config
 unpack: $(NAME)-$(VERSION)
 
 $(NAME)-$(VERSION):
-	bunzip2 -c $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
+	xzcat $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
 	(cd $(NAME)-$(VERSION); \
 	 for p in $(PATCHES); do \
 		patch -p1 <  ../$$p; \
