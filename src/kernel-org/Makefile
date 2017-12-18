@@ -66,7 +66,7 @@ include version.mk
 TAR = /bin/tar
 ARCH = $(shell /bin/uname -p)
 REDHAT.ROOT = $(CURDIR)/../../
-PATCHES = mkspec.patch
+PATCHES = None 
 
 ## Following Definitions to Patch for WEB10G Stats
 ## This only works for a few versions of kernels
@@ -75,19 +75,21 @@ PATCHES += $(ESTATSPATCH)
 DISTCONFIG = config-$(VERSION)-WEB10G
 endif
 
-
 ## Grabs the RHEL spec definition parts that will create a compatible
 ## kernel, kernel-devel, kernel-headers package triple
-SCRIPTS = rhel-spec-components
-SCRIPTSDEST = scripts/package
-
-
-rpm pkg: RPMDIRS config
+rpm pkg: RPMDIRS .rpmmacros config
 	( 								\
+		export HOME=$(CURDIR);					\
 		cd $(NAME)-$(VERSION);					\
-		$(MAKE) -e RPMOPTS='--define "_topdir $(REDHAT.ROOT)"' rpm  \
+		$(MAKE) -j 4 rpm-pkg  \
 	)
 	
+
+.rpmmacros:
+	echo "%_topdir $(REDHAT.ROOT)" > .rpmmacros
+	echo "%_buildrootdir $(CURDIR)/$(NAME)-$(VERSION).buildroot" >> .rpmmacros
+	echo "%_buildroot $(CURDIR)/$(NAME)-$(VERSION).buildroot" >> .rpmmacros
+	echo "%_var	/var" >> .rpmmacros
 
 unpack: $(NAME)-$(VERSION)
 
@@ -95,10 +97,8 @@ $(NAME)-$(VERSION):
 	xzcat $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
 	(cd $(NAME)-$(VERSION); \
 	 for p in $(PATCHES); do \
-		patch -p1 <  ../$$p; \
-	done )
-	for s in $(SCRIPTS); do cp $$s $(NAME)-$(VERSION)/$(SCRIPTSDEST); done
-	
+		if [ -f ../$$p ]; then patch -p1 <  ../$$p; fi; \
+	 done )
 
 config: unpack
 	if [ ! -f  $(USERCONFIG) ]; then /bin/cp $(DISTCONFIG) $(USERCONFIG); fi
@@ -115,4 +115,6 @@ RPMDIRS:
 		mkdir -p $(REDHAT.ROOT)/SRPMS; fi
 
 clean:
-	rm -rf $(NAME)-$(VERSION)
+	-rm -rf $(NAME)-$(VERSION)
+	-rm -rf $(NAME)-$(VERSION).buildroot
+	-rm  .rpmmacros

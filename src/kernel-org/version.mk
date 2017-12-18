@@ -1,6 +1,6 @@
 PKGROOT		= /opt/kernel-org
 NAME        = linux
-VERSION     = 3.10.55
+VERSION     = 4.14.5
 RELEASE 	= 1
 TARBALL_POSTFIX	=  tar.xz
 
