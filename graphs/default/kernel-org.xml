@@ -22,12 +22,5 @@
 	</changelog>
 
 	<!-- add edges here -->
-	<edge from="base" to="kernel-org-base"/>
-	<edge from="base" to="kernel-org-grub"/>
 	<edge from="server" to="kernel-org"/>
-
-	<!-- Ordering, fix grub after all other grub code has run -->
-
-	<!-- fix the anaconda-created grub.conf b4 standard rocks handling-->
-	<order tail="grub" head="kernel-org-grub"/>
 </graph>

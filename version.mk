@@ -3,5 +3,5 @@ RELEASE		= 0
 COLOR		= pink
 
 REDHAT.ROOT	= $(CURDIR)
-VERSION		= 3.10.55
+VERSION		:= $(shell /usr/bin/cat $(CURDIR)/src/kernel-org/version.mk | /usr/bin/awk '/^VERSION/{print $$NF}')
 ISOSIZE		= 0

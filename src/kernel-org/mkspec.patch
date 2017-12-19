@@ -1,128 +1,22 @@
-*** linux-3.10.55-orig/scripts/package/mkspec	2014-09-17 09:04:18.000000000 -0700
---- linux-3.10.55/scripts/package/mkspec	2014-10-03 11:08:52.240293214 -0700
+*** linux-4.14.5/scripts/package/mkspec	2017-12-10 04:40:45.000000000 -0800
+--- linux-4.14.5-new/scripts/package/mkspec	2017-12-15 12:55:34.559169090 -0800
 ***************
-*** 50,56 ****
-  echo "%package headers"
-  echo "Summary: Header files for the Linux kernel for use by glibc"
-  echo "Group: Development/System"
-- echo "Obsoletes: kernel-headers"
-  echo "Provides: kernel-headers = %{version}"
-  echo "%description headers"
-  echo "Kernel-headers includes the C header files that specify the interface"
---- 50,55 ----
-***************
-*** 59,65 ****
-  echo "building most standard programs and are also needed for rebuilding the"
-  echo "glibc package."
-  echo ""
-! 
-  if ! $PREBUILT; then
-  echo "%prep"
-  echo "%setup -q"
---- 58,92 ----
-  echo "building most standard programs and are also needed for rebuilding the"
-  echo "glibc package."
-  echo ""
-! echo "%package devel"
-! echo "Summary: Kernel Source, against which modules can be built"
-! echo "Group: Development/System"
-! echo "Provides: kernel-devel = %{version}"
-! echo "%description devel"
-! echo "Kernel-devel provides the kernel source code. This enables"
-! echo "kernel modules to be built after kernel install"
-! echo ""
-! echo ""
-! echo "%package firmware"
-! echo "Summary: Firmware files used by the Linux kernel"
-! echo "Group: Development/System"
-! echo "Provides: kernel-firmware = %{version}"
-! echo "%description firmware"
-! echo "Kernel-firmware includes firmware files required for some "
-! echo "devices to operate."
-! echo ""
-! echo "%package doc"
-! echo "Summary: Various documentation bits found in the kernel source"
-! echo "Group: Development/System"
-! echo "Provides: kernel-doc = %{version}"
-! echo "%description doc"
-! echo "This package contains documentation files from the kernel"
-! echo "source. Various bits of information about the Linux kernel and the"
-! echo "device drivers shipped with it are documented in these files."
-! echo ""
-! echo "You'll want to install this package if you need a reference to the"
-! echo "options that can be passed to Linux kernel modules at load time."
-! echo ""
-  if ! $PREBUILT; then
-  echo "%prep"
-  echo "%setup -q"
-***************
-*** 70,75 ****
---- 97,103 ----
-  
-  if ! $PREBUILT; then
-  echo "make clean && make %{?_smp_mflags}"
-+ echo "make mandocs" 
-  echo ""
-  fi
-  
-***************
-*** 81,86 ****
---- 109,116 ----
-  echo 'mkdir -p $RPM_BUILD_ROOT/boot $RPM_BUILD_ROOT/lib/modules'
-  echo 'mkdir -p $RPM_BUILD_ROOT/lib/firmware'
+*** 96,102 ****
+  echo "cp vmlinux arch/powerpc/boot"
+  echo "cp arch/powerpc/boot/"'$KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
+  echo "%else"
+! echo 'cp $KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
   echo "%endif"
-+ echo 'mkdir -p $RPM_BUILD_ROOT/usr/share/man/man9'
-+ echo 'install Documentation/DocBook/man/*gz $RPM_BUILD_ROOT/usr/share/man/man9'
+  echo "%endif"
   
-  echo 'INSTALL_MOD_PATH=$RPM_BUILD_ROOT make %{?_smp_mflags} KBUILD_SRC= modules_install'
-  echo "%ifarch ia64"
-***************
-*** 106,112 ****
-  echo 'mv vmlinux.bz2 $RPM_BUILD_ROOT'"/boot/vmlinux-$KERNELRELEASE.bz2"
-  echo 'mv vmlinux.orig vmlinux'
+--- 96,105 ----
+  echo "cp vmlinux arch/powerpc/boot"
+  echo "cp arch/powerpc/boot/"'$KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
+  echo "%else"
+! echo 'cp $KBUILD_IMAGE .' 
+! echo 'iName=$(basename $KBUILD_IMAGE)'
+! echo 'mv $iName '"vmlinuz-$KERNELRELEASE" 
+! echo "mv vmlinuz-$KERNELRELEASE "'$RPM_BUILD_ROOT'"/boot"
   echo "%endif"
-! 
-  echo ""
-  echo "%clean"
-  echo 'rm -rf $RPM_BUILD_ROOT'
---- 136,142 ----
-  echo 'mv vmlinux.bz2 $RPM_BUILD_ROOT'"/boot/vmlinux-$KERNELRELEASE.bz2"
-  echo 'mv vmlinux.orig vmlinux'
   echo "%endif"
-! cat `dirname $0`/rhel-spec-components
-  echo ""
-  echo "%clean"
-  echo 'rm -rf $RPM_BUILD_ROOT'
-***************
-*** 115,124 ****
-  echo '%defattr (-, root, root)'
-  echo "%dir /lib/modules"
-  echo "/lib/modules/$KERNELRELEASE"
-- echo "/lib/firmware"
-  echo "/boot/*"
-  echo ""
-  echo "%files headers"
-  echo '%defattr (-, root, root)'
-  echo "/usr/include"
-  echo ""
---- 145,164 ----
-  echo '%defattr (-, root, root)'
-  echo "%dir /lib/modules"
-  echo "/lib/modules/$KERNELRELEASE"
-  echo "/boot/*"
-  echo ""
-  echo "%files headers"
-  echo '%defattr (-, root, root)'
-  echo "/usr/include"
-  echo ""
-+ echo "%files devel"
-+ echo '%defattr (-, root, root)'
-+ echo "%dir /usr/src/kernels"
-+ echo "/usr/src/kernels/%{version}-%{_arch}"
-+ echo ""
-+ echo "%files firmware"
-+ echo '%defattr (-, root, root)'
-+ echo "/lib/firmware"
-+ echo "%files doc"
-+ echo '%defattr (-, root, root)'
-+ echo "/usr/share/man/man9"
+  
