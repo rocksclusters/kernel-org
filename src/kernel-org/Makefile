@@ -94,7 +94,7 @@ rpm pkg: RPMDIRS .rpmmacros config
 unpack: $(NAME)-$(VERSION)
 
 $(NAME)-$(VERSION).$(TARBALL_POSTFIX):
-	wget https://cdn.kernel.org/pub/linux/kernel/v3.x/$(NAME)-$(VERSION).$(TARBALL_POSTFIX)
+	wget https://cdn.kernel.org/pub/linux/kernel/v$(shell echo $(VERSION) | cut -d. -f1).x/$(NAME)-$(VERSION).$(TARBALL_POSTFIX)
 
 $(NAME)-$(VERSION): $(NAME)-$(VERSION).$(TARBALL_POSTFIX)
 	xzcat $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
