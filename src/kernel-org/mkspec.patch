@@ -1,22 +1,33 @@
-*** linux-4.14.5/scripts/package/mkspec	2017-12-10 04:40:45.000000000 -0800
---- linux-4.14.5-new/scripts/package/mkspec	2017-12-15 12:55:34.559169090 -0800
+*** linux-4.15.3/scripts/package/mkspec	2018-02-11 22:07:23.000000000 -0800
+--- linux-4.15.3-new/scripts/package/mkspec	2018-03-09 10:57:27.893063023 -0800
 ***************
-*** 96,102 ****
-  echo "cp vmlinux arch/powerpc/boot"
-  echo "cp arch/powerpc/boot/"'$KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
-  echo "%else"
-! echo 'cp $KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
-  echo "%endif"
-  echo "%endif"
+*** 27,32 ****
+--- 27,33 ----
+  fi
   
---- 96,105 ----
-  echo "cp vmlinux arch/powerpc/boot"
-  echo "cp arch/powerpc/boot/"'$KBUILD_IMAGE $RPM_BUILD_ROOT'"/boot/vmlinuz-$KERNELRELEASE"
-  echo "%else"
-! echo 'cp $KBUILD_IMAGE .' 
-! echo 'iName=$(basename $KBUILD_IMAGE)'
-! echo 'mv $iName '"vmlinuz-$KERNELRELEASE" 
-! echo "mv vmlinuz-$KERNELRELEASE "'$RPM_BUILD_ROOT'"/boot"
-  echo "%endif"
-  echo "%endif"
-  
+  PROVIDES="$PROVIDES kernel-$KERNELRELEASE"
++ PROVIDES="$PROVIDES kernel-uname-r = %{version}"
+  __KERNELRELEASE=$(echo $KERNELRELEASE | sed -e "s/-/_/g")
+  EXCLUDES="$RCS_TAR_IGNORE --exclude=.tmp_versions --exclude=*vmlinux* \
+  --exclude=*.o --exclude=*.ko --exclude=*.cmd --exclude=Documentation \
+***************
+*** 70,75 ****
+--- 71,77 ----
+  $S$M	Summary: Development package for building kernel modules to match the $__KERNELRELEASE kernel
+  $S$M	Group: System Environment/Kernel
+  $S$M	AutoReqProv: no
++ $S$M	Provides: kernel-devel-uname-r = %{version} 
+  $S$M	%description -n kernel-devel
+  $S$M	This package provides kernel headers and makefiles sufficient to build modules
+  $S$M	against the $__KERNELRELEASE kernel package.
+***************
+*** 93,100 ****
+  	make %{?_smp_mflags} INSTALL_HDR_PATH=%{buildroot}/usr KBUILD_SRC= headers_install
+  	cp System.map %{buildroot}/boot/System.map-$KERNELRELEASE
+  	cp .config %{buildroot}/boot/config-$KERNELRELEASE
+- 	bzip2 -9 --keep vmlinux
+- 	mv vmlinux.bz2 %{buildroot}/boot/vmlinux-$KERNELRELEASE.bz2
+  $S$M	rm -f %{buildroot}/lib/modules/$KERNELRELEASE/build
+  $S$M	rm -f %{buildroot}/lib/modules/$KERNELRELEASE/source
+  $S$M	mkdir -p %{buildroot}/usr/src/kernels/$KERNELRELEASE
+--- 95,100 ----
