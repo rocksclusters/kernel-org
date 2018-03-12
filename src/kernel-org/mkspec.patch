@@ -1,18 +1,29 @@
 *** linux-4.15.3/scripts/package/mkspec	2018-02-11 22:07:23.000000000 -0800
---- linux-4.15.3-new/scripts/package/mkspec	2018-03-09 10:57:27.893063023 -0800
+--- linux-4.15.3-new/scripts/package/mkspec	2018-03-12 10:26:45.383509002 -0700
 ***************
 *** 27,32 ****
---- 27,33 ----
+--- 27,34 ----
   fi
   
   PROVIDES="$PROVIDES kernel-$KERNELRELEASE"
 + PROVIDES="$PROVIDES kernel-uname-r = %{version}"
++ REQUIRES=grubby
   __KERNELRELEASE=$(echo $KERNELRELEASE | sed -e "s/-/_/g")
   EXCLUDES="$RCS_TAR_IGNORE --exclude=.tmp_versions --exclude=*vmlinux* \
   --exclude=*.o --exclude=*.ko --exclude=*.cmd --exclude=Documentation \
 ***************
+*** 48,53 ****
+--- 50,56 ----
+  	URL: http://www.kernel.org
+  $S	Source: kernel-$__KERNELRELEASE.tar.gz
+  	Provides: $PROVIDES
++ 	Requires: $REQUIRES 
+  	%define __spec_install_post /usr/lib/rpm/brp-compress || :
+  	%define debug_package %{nil}
+  
+***************
 *** 70,75 ****
---- 71,77 ----
+--- 73,79 ----
   $S$M	Summary: Development package for building kernel modules to match the $__KERNELRELEASE kernel
   $S$M	Group: System Environment/Kernel
   $S$M	AutoReqProv: no
@@ -30,4 +41,4 @@
   $S$M	rm -f %{buildroot}/lib/modules/$KERNELRELEASE/build
   $S$M	rm -f %{buildroot}/lib/modules/$KERNELRELEASE/source
   $S$M	mkdir -p %{buildroot}/usr/src/kernels/$KERNELRELEASE
---- 95,100 ----
+--- 97,102 ----
