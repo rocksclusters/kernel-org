@@ -23,4 +23,5 @@
 
 	<!-- add edges here -->
 	<edge from="server" to="kernel-org"/>
+	<edge from="base" to="kernel-org-base"/>
 </graph>
