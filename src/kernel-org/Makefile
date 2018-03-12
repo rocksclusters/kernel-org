@@ -66,7 +66,7 @@ include version.mk
 TAR = /bin/tar
 ARCH = $(shell /bin/uname -p)
 REDHAT.ROOT = $(CURDIR)/../../
-PATCHES = None 
+PATCHES = mkspec.patch 
 
 ## Following Definitions to Patch for WEB10G Stats
 ## This only works for a few versions of kernels
@@ -93,7 +93,10 @@ rpm pkg: RPMDIRS .rpmmacros config
 
 unpack: $(NAME)-$(VERSION)
 
-$(NAME)-$(VERSION):
+$(NAME)-$(VERSION).$(TARBALL_POSTFIX):
+	wget https://cdn.kernel.org/pub/linux/kernel/v3.x/$(NAME)-$(VERSION).$(TARBALL_POSTFIX)
+
+$(NAME)-$(VERSION): $(NAME)-$(VERSION).$(TARBALL_POSTFIX)
 	xzcat $(NAME)-$(VERSION).$(TARBALL_POSTFIX) | $(TAR) -xf -
 	(cd $(NAME)-$(VERSION); \
 	 for p in $(PATCHES); do \
